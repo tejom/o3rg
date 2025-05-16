@@ -5,9 +5,11 @@ use std::error;
 #[derive(Clone, Debug)]
 #[non_exhaustive]
 pub enum ErrorKind {
+    /// Wrapper for regex crate errors
     GrepRegexErr(regex::Error),
 }
 
+/// Errors for this crate
 #[derive(Debug, Clone)]
 pub struct Error {
     kind: ErrorKind,
@@ -34,6 +36,7 @@ impl From<regex::Error> for Error {
 }
 
 impl error::Error for Error {}
+
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.kind {
