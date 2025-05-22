@@ -6,10 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
 name = "o3rg"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 grep = "0.3.2"
 ignore = "0.4.23"
 pyo3 = "0.24.0"
-walkdir = "2.5.0"
