@@ -12,3 +12,6 @@ crate-type = ["cdylib", "rlib"]
 grep = "0.3.2"
 ignore = "0.4.23"
 pyo3 = "0.24.0"
+
+[dev-dependencies]
+tempfile = "3.10.1"

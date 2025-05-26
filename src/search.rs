@@ -105,6 +105,9 @@ pub fn search_dir(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
+    use std::io::Write;
+    use tempfile::TempDir;
 
     #[test]
     fn test_search_single_file() {
@@ -115,5 +118,100 @@ mod tests {
 
         let res = search_single_file(c, "name").unwrap();
         assert_eq!(res.len(), 2)
+    }
+
+    #[test]
+    fn test_search_single_file_no_matches() {
+        let f = "test abc\n123 xyz\nteststring".to_owned().into_bytes();
+        let c = std::io::Cursor::new(f);
+
+        let res = search_single_file(c, "nonexistent").unwrap();
+        assert_eq!(res.len(), 0);
+    }
+
+    #[test]
+    fn test_search_single_file_with_regex() {
+        let f = "test123\ntest456\nnotmatch\ntest789".to_owned().into_bytes();
+        let c = std::io::Cursor::new(f);
+
+        let res = search_single_file(c, r"test\d+").unwrap();
+        assert_eq!(res.len(), 3);
+    }
+
+    #[test]
+    fn test_search_single_path_and_file() {
+        let temp_dir = TempDir::new().unwrap();
+        let file_path = temp_dir.path().join("test.txt");
+        let mut file = File::create(&file_path).unwrap();
+        writeln!(file, "line1 test\nline2\nline3 test").unwrap();
+
+        let res = search_single_path(&file_path, "test").unwrap();
+        assert_eq!(res.len(), 2);
+
+        // Test search_file wrapper as well
+        let res = search_file(file_path.to_str().unwrap(), "test").unwrap();
+        assert_eq!(res.len(), 2);
+    }
+
+    #[test]
+    fn test_search_dir_basic() {
+        let temp_dir = TempDir::new().unwrap();
+        
+        // Create a few test files
+        let file1_path = temp_dir.path().join("file1.txt");
+        let mut file1 = File::create(&file1_path).unwrap();
+        writeln!(file1, "test content\nmore content").unwrap();
+
+        let file2_path = temp_dir.path().join("file2.txt");
+        let mut file2 = File::create(&file2_path).unwrap();
+        writeln!(file2, "test another\ntest final").unwrap();
+
+        let res = search_dir(
+            temp_dir.path().to_str().unwrap(),
+            "test",
+            Some(false),
+        ).unwrap();
+
+        assert_eq!(res.len(), 3); // Should find 3 matches across both files
+    }
+
+    #[test]
+    fn test_search_dir_with_hidden() {
+        let temp_dir = TempDir::new().unwrap();
+        
+        // Create a regular file
+        let file_path = temp_dir.path().join("visible.txt");
+        let mut file = File::create(&file_path).unwrap();
+        writeln!(file, "test content").unwrap();
+
+        // Create a hidden file
+        let hidden_path = temp_dir.path().join(".hidden.txt");
+        let mut hidden_file = File::create(&hidden_path).unwrap();
+        writeln!(hidden_file, "test content").unwrap();
+
+        // Test with hidden files excluded (default behavior)
+        let res_without_hidden = search_dir(
+            temp_dir.path().to_str().unwrap(),
+            "test",
+            Some(true),  // true means ignore hidden files
+        ).unwrap();
+        assert_eq!(res_without_hidden.len(), 1);
+
+        // Test with hidden files included
+        let res_with_hidden = search_dir(
+            temp_dir.path().to_str().unwrap(),
+            "test",
+            Some(false),  // false means don't ignore hidden files
+        ).unwrap();
+        assert_eq!(res_with_hidden.len(), 2);
+    }
+
+    #[test]
+    fn test_invalid_regex() {
+        let f = "test content".to_owned().into_bytes();
+        let c = std::io::Cursor::new(f);
+
+        let res = search_single_file(c, "[invalid regex(");
+        assert!(res.is_err());
     }
 }
