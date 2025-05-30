@@ -17,7 +17,7 @@ fn test_search_single() {
 #[test]
 fn test_search_dir() {
     let temp_dir = TempDir::new().unwrap();
-    
+
     // Create test files
     let file_a = temp_dir.path().join("a.txt");
     let mut file_a_handle = File::create(&file_a).unwrap();
@@ -38,7 +38,7 @@ fn test_search_dir() {
 #[test]
 fn test_search_dir_with_hidden() {
     let temp_dir = TempDir::new().unwrap();
-    
+
     // Create visible and hidden files
     let visible_file = temp_dir.path().join("visible.txt");
     let mut visible_handle = File::create(&visible_file).unwrap();

@@ -7,9 +7,11 @@ use {
     std::sync::Mutex,
 };
 
-//mod error;
 use crate::error::{Error, SearchResult};
 
+/// Class for a match result in a file returned to Python users.
+/// Line is the line number of the match.
+/// Match result is the text of the match.
 #[pyclass]
 pub struct SearchMatch {
     line: u64,
@@ -131,7 +133,9 @@ mod tests {
 
     #[test]
     fn test_search_single_file_with_regex() {
-        let f = "test123\ntest456\nnotmatch\ntest789".to_owned().into_bytes();
+        let f = "test123\ntest456\nnotmatch\ntest789"
+            .to_owned()
+            .into_bytes();
         let c = std::io::Cursor::new(f);
 
         let res = search_single_file(c, r"test\d+").unwrap();
@@ -156,7 +160,7 @@ mod tests {
     #[test]
     fn test_search_dir_basic() {
         let temp_dir = TempDir::new().unwrap();
-        
+
         // Create a few test files
         let file1_path = temp_dir.path().join("file1.txt");
         let mut file1 = File::create(&file1_path).unwrap();
@@ -166,11 +170,7 @@ mod tests {
         let mut file2 = File::create(&file2_path).unwrap();
         writeln!(file2, "test another\ntest final").unwrap();
 
-        let res = search_dir(
-            temp_dir.path().to_str().unwrap(),
-            "test",
-            Some(false),
-        ).unwrap();
+        let res = search_dir(temp_dir.path().to_str().unwrap(), "test", Some(false)).unwrap();
 
         assert_eq!(res.len(), 3); // Should find 3 matches across both files
     }
@@ -178,7 +178,7 @@ mod tests {
     #[test]
     fn test_search_dir_with_hidden() {
         let temp_dir = TempDir::new().unwrap();
-        
+
         // Create a regular file
         let file_path = temp_dir.path().join("visible.txt");
         let mut file = File::create(&file_path).unwrap();
@@ -193,16 +193,18 @@ mod tests {
         let res_without_hidden = search_dir(
             temp_dir.path().to_str().unwrap(),
             "test",
-            Some(true),  // true means ignore hidden files
-        ).unwrap();
+            Some(true), // true means ignore hidden files
+        )
+        .unwrap();
         assert_eq!(res_without_hidden.len(), 1);
 
         // Test with hidden files included
         let res_with_hidden = search_dir(
             temp_dir.path().to_str().unwrap(),
             "test",
-            Some(false),  // false means don't ignore hidden files
-        ).unwrap();
+            Some(false), // false means don't ignore hidden files
+        )
+        .unwrap();
         assert_eq!(res_with_hidden.len(), 2);
     }
 
