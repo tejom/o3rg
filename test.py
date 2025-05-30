@@ -8,7 +8,13 @@ import os
 # except ValueError as e:
 #     print(e)
 
-# print(o3rg.search("Cargo.toml", "ver"))
+print(o3rg.search("Cargo.toml", "ver"))
+
+res = o3rg.search("Cargo.toml", "ver")
+print(res[0].line)
+print(res[0].match_result)
+
+os._exit(0)
 
 start = time()
 for root, dirs , files in os.walk("./"):

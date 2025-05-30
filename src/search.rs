@@ -14,7 +14,9 @@ use crate::error::{Error, SearchResult};
 /// Match result is the text of the match.
 #[pyclass]
 pub struct SearchMatch {
+    #[pyo3(get)]
     line: u64,
+    #[pyo3(get)]
     match_result: String,
 }
 
